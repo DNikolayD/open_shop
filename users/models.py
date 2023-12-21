@@ -1,6 +1,5 @@
 from django.db.models import (Model as DbModel, OneToOneField as One, CharField, EmailField, DateTimeField, UUIDField,
                               ManyToManyField as Many, IntegerField, CASCADE)
-from products.models import Review, Product
 from django.contrib.auth.models import User
 from uuid import uuid4 as id_type
 
@@ -12,7 +11,7 @@ class Seller(DbModel):
     name = CharField(max_length=200)
     phone = CharField(max_length=13)
     email = EmailField(max_length=500, blank=True, null=True)
-    reviews = Many(to=Review, blank=True, null=True)
+    reviews = Many(to="products.Review", blank=True, null=True)
     created = DateTimeField(auto_now_add=True)
     id = UUIDField(default=id_type, unique=True, primary_key=True, editable=False)
 
@@ -39,7 +38,7 @@ class Buyer(DbModel):
 
 class ShoppingCart(DbModel):
     owner = One(Buyer, on_delete=CASCADE, null=True, blank=True)
-    products = Many(Product)
+    products = Many("products.Product")
     prise = IntegerField(null=True, blank=True)
     created = DateTimeField(auto_now_add=True)
     id = UUIDField(default=id_type, unique=True, primary_key=True, editable=False)

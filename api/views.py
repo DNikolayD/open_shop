@@ -12,31 +12,35 @@ from .permisions import IsSeller, IsBuyer
 def get_routes(request):
 
     routes = [
+        # tested
         {'GET': '/api/products'},
         {'GET': '/api/products/id'},
         {'POST': '/api/products/id/review'},
-        {'POST': '/api/products'},
-        {'PUT': '/api/products/id'},
-        {'DELETE': '/api/products/id'},
+        {'POST': '/api/products-create'},
+        {'PUT': '/api/products/update/id'},
+        {'DELETE': '/api/products/delete/id'},
 
-        {'GET': '/api/business/id'},
-        {'POST': '/api/business'},
-        {'PUT': '/api/business/id'},
-        {'DELETE': '/api/business/id'},
+        # not tested
+        {'GET': '/api/businesses'},
+        {'GET': '/api/businesses/id'},
+        {'POST': '/api/businesses/create'},
+        {'PUT': '/api/businesses/update/id'},
+        {'DELETE': '/api/businesses/delete/id'},
 
-        {'GET': '/api/seller'},
-        {'GET': '/api/buyer'},
-        {'POST': '/api/seller'},
-        {'POST': '/api/buyer'},
-        {'PUT': '/api/seller'},
-        {'PUT': '/api/buyer'},
-        {'DELETE': '/api/seller'},
-        {'DELETE': '/api/buyer'},
+        {'GET': '/api/sellers'},
+        {'POST': '/api/sellers/create'},
+        {'PUT': '/api/seller/update'},
+        {'DELETE': '/api/seller/delete'},
 
-        {'GET': '/api/shopping-cart'},
-        {'POST': '/api/shipping-cart'},
-        {'PUT': '/api/shipping-cart'},
-        {'DELETE': '/api/shipping-cart'},
+        {'GET': '/api/buyers'},
+        {'POST': '/api/buyers/create'},
+        {'PUT': '/api/buyer/update'},
+        {'DELETE': '/api/buyer/delete'},
+
+        {'GET': '/api/shopping-carts'},
+        {'POST': '/api/shipping-carts/create'},
+        {'PUT': '/api/shipping-carts/update'},
+        {'DELETE': '/api/shipping-carts/delete'},
 
         {'POST': '/api/users/token'},
         {'POST': '/api/users/token/refresh'}
@@ -66,10 +70,11 @@ def product_review(request, pk):
     data = request.data
 
     review, created = Review.objects.get_or_create(
-        owner=sender,
+        sender=sender,
+        rating=data['rating'],
+        content=data['content']
     )
 
-    review.value = data['value']
     review.save()
 
     serializer = ProductSerializer(product, many=False)
