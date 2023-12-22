@@ -25,7 +25,7 @@ urlpatterns = [
     path('products/delete/<str:pk>', delete_product),
     path('businesses', get_businesses),
     path('businesses/<str:pk>', get_business),
-    path('businesses/create', create_business),
+    path('businesses-create', create_business),
     path('businesses/update/<str:pk>', update_business),
     path('businesses/delete/<str:pk>', delete_business),
     path('sellers/', get_seller),

@@ -1,10 +1,10 @@
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .serializers import ProductSerializer, BusinessSerializer, SellerSerializer, BuyerSerializer, \
+from .serializers import ProductSerializer, BusinessSerializer, UserSerializer, SellerSerializer, BuyerSerializer, \
     ShoppingCartSerializer
 from products.models import Product, Business, Review
-from users.models import ShoppingCart
+from users.models import ShoppingCart, Buyer
 from .permisions import IsSeller, IsBuyer
 
 
@@ -23,7 +23,7 @@ def get_routes(request):
         # not tested
         {'GET': '/api/businesses'},
         {'GET': '/api/businesses/id'},
-        {'POST': '/api/businesses/create'},
+        {'POST': '/api/businesses-create'},
         {'PUT': '/api/businesses/update/id'},
         {'DELETE': '/api/businesses/delete/id'},
 
@@ -68,14 +68,21 @@ def product_review(request, pk):
     product = Product.objects.get(id=pk)
     sender = request.user.buyer
     data = request.data
+    business = None
+    for item in Business.objects.all():
+         if item.products.get(id=pk) is not None:
+             business = item
+             break
+    owner = business.owner
 
     review, created = Review.objects.get_or_create(
         sender=sender,
         rating=data['rating'],
         content=data['content']
     )
-
     review.save()
+    owner.reviews.add(review)
+    owner.save()
 
     serializer = ProductSerializer(product, many=False)
     return Response(serializer.data)
@@ -131,7 +138,7 @@ def get_business(request, pk):
 @api_view(['POST'])
 @permission_classes([IsSeller])
 def create_business(request):
-    serializer = ProductSerializer(data=request.data)
+    serializer = BusinessSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=HTTP_201_CREATED)
@@ -211,20 +218,27 @@ def get_buyer(request):
 
 @api_view(['POST'])
 def create_buyer(request):
-    serializer = BuyerSerializer(data=request.data)
+    data = request.data
+    data["name"] = data["user"]["username"]
+    user=UserSerializer(data=data["user"])
+    if user.is_valid():
+        user.save()
+    else:
+        print('error', user.errors)
+        return Response(user.errors, status=HTTP_400_BAD_REQUEST)
+    serializer = BuyerSerializer(data=data, many=False)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data, status=HTTP_201_CREATED)
-    else:
-        print('error', serializer.errors)
-        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+    return Response(serializer.data, status=HTTP_201_CREATED)
 
 
 @api_view(['PUT'])
 @permission_classes([IsBuyer])
 def update_buyer(request):
     buyer = request.user.buyer
-    serializer = BuyerSerializer(data=request.data)
+    data = request.data
+    data["name"] = data["user"]["username"]
+    serializer = BuyerSerializer(data=data)
     if serializer.is_valid():
         buyer = serializer.save()
         return Response(serializer.data)

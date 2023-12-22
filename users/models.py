@@ -23,7 +23,7 @@ class Seller(DbModel):
 
 
 class Buyer(DbModel):
-    user = One(User, on_delete=CASCADE, null=True, blank=True)
+    user = One(User, on_delete=CASCADE)
     name = CharField(max_length=200)
     email = EmailField(max_length=500, blank=True, null=True)
     created = DateTimeField(auto_now_add=True)

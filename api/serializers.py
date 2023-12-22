@@ -1,6 +1,13 @@
 from rest_framework.serializers import ModelSerializer
 from products.models import Tag, Product, Image, Review, Business
 from users.models import Seller, Buyer, ShoppingCart
+from django.contrib.auth.models import User
+
+
+class UserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
 
 
 class BuyerSerializer(ModelSerializer):
